@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Buddy — St. Regis Goa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A96E; --gold-l: #E8D5A3; --gold-d: #9A7A4A;
+  --navy: #0A1628; --navy-m: #122035; --navy-l: #1A3050;
+  --cream: #F0E6D3; --muted: #8EA0B5; --accent: #7BA7BC;
+  --green: #4ADE80;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+#splash{position:fixed;inset:0;z-index:1000;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.8s ease,transform 0.8s ease;}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none;}
+.splash-logo{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--gold-l);letter-spacing:0.2em;text-align:center;animation:fadeIn 1s ease forwards;}
+.splash-sub{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);animation:fadeIn 1.4s ease forwards;}
+.splash-mascot{width:110px;height:110px;animation:floatIn 1s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;}
+.splash-bar-wrap{width:200px;height:2px;background:rgba(201,169,110,0.15);border-radius:2px;overflow:hidden;margin-top:8px;}
+.splash-bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold));border-radius:2px;animation:loadBar 2.2s ease forwards 0.6s;}
+@keyframes loadBar{to{width:100%;}}
+@keyframes floatIn{to{opacity:1;transform:translateY(0);}from{opacity:0;transform:translateY(30px);}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+body{font-family:'Jost',sans-serif;background:var(--navy);color:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.shell{position:relative;z-index:1;width:100%;max-width:840px;height:100vh;max-height:740px;display:flex;flex-direction:column;background:linear-gradient(160deg,var(--navy-m) 0%,var(--navy) 100%);border:1px solid rgba(201,169,110,0.22);box-shadow:0 40px 120px rgba(0,0,0,0.7),inset 0 1px 0 rgba(201,169,110,0.18);overflow:hidden;}
+.shell::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgba(201,169,110,0.08),transparent 60%);animation:shimmer 6s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{opacity:0.5}50%{opacity:1}}
+.header{position:relative;z-index:2;padding:14px 28px 14px;background:linear-gradient(135deg,var(--navy-l),rgba(10,22,40,0.98));border-bottom:1px solid rgba(201,169,110,0.18);display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.hdr-mascot-wrap{position:relative;flex-shrink:0;}
+.hdr-mascot{width:56px;height:56px;animation:bobHead 4s ease-in-out infinite;filter:drop-shadow(0 4px 16px rgba(201,169,110,0.4));}
+@keyframes bobHead{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1deg)}}
+.hdr-pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(201,169,110,0.4);animation:hdrPulse 2.5s ease-in-out infinite;}
+@keyframes hdrPulse{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.12);opacity:0}}
+.status-dot{position:absolute;bottom:4px;right:4px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--navy-m);animation:blink 2.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.35}}
+.hdr-text{flex:1;}
+.hdr-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;letter-spacing:0.06em;color:var(--gold-l);}
+.hdr-sub{font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.hdr-typing-text{font-size:0.68rem;letter-spacing:0.06em;color:var(--green);margin-top:3px;height:14px;opacity:0;transition:opacity 0.3s;}
+.hdr-typing-text.show{opacity:1;}
+.hdr-badge{margin-left:auto;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.28);color:var(--gold);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;padding:5px 12px;border-radius:20px;animation:badgePulse 4s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(201,169,110,0.3)}}
+.messages{flex:1;overflow-y:auto;padding:24px 28px 12px;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth;position:relative;z-index:1;}
+.messages::-webkit-scrollbar{width:3px;}.messages::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.2);border-radius:2px;}
+.msg{display:flex;gap:10px;opacity:0;}.msg.bot{animation:slideInLeft 0.45s cubic-bezier(.34,1.4,.64,1) forwards;}.msg.user{flex-direction:row-reverse;animation:slideInRight 0.4s cubic-bezier(.34,1.4,.64,1) forwards;}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+.msg-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:4px;overflow:hidden;}
+.msg.bot .msg-av{background:linear-gradient(135deg,var(--gold-d),var(--gold));}.msg.user .msg-av{background:linear-gradient(135deg,var(--navy-l),var(--accent));font-size:11px;}
+.msg-bot-svg{width:32px;height:32px;}
+.msg-body{max-width:70%;display:flex;flex-direction:column;gap:3px;}.msg.user .msg-body{align-items:flex-end;}
+.msg-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:0 4px;}
+.bubble{padding:13px 17px;border-radius:16px;font-size:0.87rem;line-height:1.65;letter-spacing:0.01em;position:relative;overflow:hidden;}
+.msg.bot .bubble{background:var(--navy-l);border:1px solid rgba(201,169,110,0.14);border-top-left-radius:3px;color:var(--cream);}
+.msg.bot .bubble::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,169,110,0.04),transparent);pointer-events:none;}
+.msg.user .bubble{background:linear-gradient(135deg,var(--gold-d),var(--gold));border-top-right-radius:3px;color:var(--navy);font-weight:500;}
+.typing-indicator{display:flex;gap:5px;padding:14px 17px;align-items:center;}.dot{width:7px;height:7px;border-radius:50%;background:var(--gold);}.dot:nth-child(1){animation:wave 1.3s 0.0s ease-in-out infinite;}.dot:nth-child(2){animation:wave 1.3s 0.18s ease-in-out infinite;}.dot:nth-child(3){animation:wave 1.3s 0.36s ease-in-out infinite;}@keyframes wave{0%,60%,100%{transform:translateY(0);opacity:0.3}30%{transform:translateY(-9px);opacity:1}}
+.quick-replies{padding:2px 0 10px 42px;display:flex;flex-wrap:wrap;gap:7px;opacity:0;animation:fadeUp 0.5s ease forwards 0.25s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.qr{background:rgba(201,169,110,0.07);border:1px solid rgba(201,169,110,0.28);color:var(--gold);font-family:'Jost',sans-serif;font-size:0.73rem;letter-spacing:0.04em;padding:6px 13px;border-radius:20px;cursor:pointer;transition:all 0.22s ease;white-space:nowrap;}
+.qr:hover{background:rgba(201,169,110,0.18);border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 14px rgba(201,169,110,0.25);}.qr:active{transform:scale(0.95);}
+.divider{display:flex;align-items:center;gap:10px;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(201,169,110,0.1);}
+.input-area{padding:14px 22px 18px;background:linear-gradient(0deg,var(--navy-m),transparent);border-top:1px solid rgba(201,169,110,0.1);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;position:relative;z-index:2;}
+textarea{flex:1;background:var(--navy-l);border:1px solid rgba(201,169,110,0.18);border-radius:12px;color:var(--cream);font-family:'Jost',sans-serif;font-size:0.87rem;padding:12px 15px;resize:none;outline:none;line-height:1.5;max-height:110px;transition:border-color 0.25s,box-shadow 0.25s;}
+textarea::placeholder{color:var(--muted);}textarea:focus{border-color:rgba(201,169,110,0.45);box-shadow:0 0 0 3px rgba(201,169,110,0.08);}
+.send-btn{width:46px;height:46px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;cursor:pointer;color:var(--navy);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.22s ease;box-shadow:0 4px 16px rgba(201,169,110,0.3);}
+.send-btn:hover{transform:scale(1.08) rotate(5deg);box-shadow:0 6px 22px rgba(201,169,110,0.5);}.send-btn:active{transform:scale(0.94);}.send-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.footer-note{text-align:center;font-size:0.6rem;letter-spacing:0.08em;color:rgba(142,160,181,0.45);padding-bottom:5px;text-transform:uppercase;position:relative;z-index:2;}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <svg class="splash-mascot" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="105" rx="28" ry="22" fill="#1A3050" stroke="#C9A96E" stroke-width="1.5"/>
+    <path d="M54 95 L60 99 L66 95 L62 92 L60 94 L58 92 Z" fill="#C9A96E"/>
+    <circle cx="60" cy="60" r="30" fill="url(#skinGrad)"/>
+    <ellipse cx="60" cy="36" rx="22" ry="10" fill="#3D2B1F"/>
+    <path d="M38 46 Q36 35 48 32 Q60 28 72 32 Q84 35 82 46" fill="#3D2B1F"/>
+    <ellipse cx="50" cy="58" rx="5" ry="5.5" fill="white"/>
+    <ellipse cx="70" cy="58" rx="5" ry="5.5" fill="white"/>
+    <circle cx="51" cy="59" r="3.5" fill="#1A1A2E"/>
+    <circle cx="71" cy="59" r="3.5" fill="#1A1A2E"/>
+    <circle cx="52" cy="57.5" r="1.2" fill="white"/>
+    <circle cx="72" cy="57.5" r="1.2" fill="white"/>
+    <path d="M50 70 Q60 78 70 70" stroke="#9A7A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="44" cy="67" rx="6" ry="3.5" fill="#E8A87C" opacity="0.35"/>
+    <ellipse cx="76" cy="67" rx="6" ry="3.5" fill="#E8A87C" opacity="0.35"/>
+    <text x="53" y="113" font-size="10" fill="#C9A96E" opacity="0.9">★ HR</text>
+    <defs><radialGradient id="skinGrad" cx="0.4" cy="0.35"><stop offset="0" stop-color="#F0D9B5"/><stop offset="1" stop-color="#D4A870"/></radialGradient></defs>
+  </svg>
+  <div class="splash-logo">HR Buddy</div>
+  <div class="splash-sub">St. Regis Goa · Human Resources</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<canvas id="particles"></canvas>
+
+<div class="shell">
+  <div class="header">
+    <div class="hdr-mascot-wrap">
+      <div class="hdr-pulse"></div>
+      <svg class="hdr-mascot" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="60" cy="105" rx="28" ry="22" fill="#1A3050" stroke="#C9A96E" stroke-width="1.5"/>
+        <path d="M54 95 L60 99 L66 95 L62 92 L60 94 L58 92 Z" fill="#C9A96E"/>
+        <circle cx="60" cy="60" r="30" fill="url(#sg2)"/>
+        <ellipse cx="60" cy="36" rx="22" ry="10" fill="#3D2B1F"/>
+        <path d="M38 46 Q36 35 48 32 Q60 28 72 32 Q84 35 82 46" fill="#3D2B1F"/>
+        <ellipse cx="50" cy="58" rx="5" ry="5.5" fill="white"/>
+        <ellipse cx="70" cy="58" rx="5" ry="5.5" fill="white"/>
+        <circle cx="51" cy="59" r="3.5" fill="#1A1A2E"/>
+        <circle cx="71" cy="59" r="3.5" fill="#1A1A2E"/>
+        <circle cx="52" cy="57.5" r="1.2" fill="white"/>
+        <circle cx="72" cy="57.5" r="1.2" fill="white"/>
+        <path d="M50 70 Q60 78 70 70" stroke="#9A7A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="44" cy="67" rx="6" ry="3.5" fill="#E8A87C" opacity="0.35"/>
+        <ellipse cx="76" cy="67" rx="6" ry="3.5" fill="#E8A87C" opacity="0.35"/>
+        <defs><radialGradient id="sg2" cx="0.4" cy="0.35"><stop offset="0" stop-color="#F0D9B5"/><stop offset="1" stop-color="#D4A870"/></radialGradient></defs>
+      </svg>
+      <div class="status-dot"></div>
+    </div>
+    <div class="hdr-text">
+      <div class="hdr-name">HR Buddy</div>
+      <div class="hdr-sub">St. Regis Goa Resort · Human Resources</div>
+      <div class="hdr-typing-text" id="hdrTyping">✪ HR Buddy is typing…</div>
+    </div>
+    <div class="hdr-badge">● Live</div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="divider">Welcome to St. Regis Goa HR Portal</div>
+  </div>
+
+  <div class="input-area">
+    <textarea id="userInput" rows="1"
+      placeholder="Ask HR Buddy about leave, benefits, policies, training…"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage(event)" title="Send">➤</button>
+  </div>
+  <div class="footer-note">St. Regis Goa · Confidential HR Portal · All queries are secure</div>
+</div>
+
+<script>
+/* ── Particles ─────────────────────────────────────────── */
+(function(){
+  try {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+    function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    function mkP(){ return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.6+0.4, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, a:Math.random(), gold:Math.random()>0.5 }; }
+    for(let i=0;i<80;i++) particles.push(mkP());
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      particles.forEach(p=>{
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = p.gold ? `rgba(201,169,110,${p.a*0.35})` : `rgba(123,167,188,${p.a*0.2})`;
+        ctx.fill();
+        p.x+=p.vx; p.y+=p.vy; p.a+=0.008;
+        if(p.a>1) p.a=0;
+        if(p.x<0||p.x>W) p.vx*=-1;
+        if(p.y<0||p.y>H) p.vy*=-1;
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  } catch(e){ console.warn('Particles error:', e); }
+})();
+
+/* ── Config ────────────────────────────────────────────── */
+const API_URL = new URL('/api/chat', window.location.origin).toString();
+const QUICK_REPLIES = ['📅 Notice/Separation Process', '👔 Uniform', '🏖️ Leave Entitlements', '✈️ Internal Transfer/Relocation'];
+let isBusy = false;
+
+/* ── Helpers ───────────────────────────────────────────── */
+// Helpers
+function renderSafeFormatted(text) {
+  const safe = String(text || '');
+  const fragment = document.createDocumentFragment();
+  const lines = safe.split(/\n+/);
+
+  lines.forEach((line, lineIndex) => {
+    const span = document.createElement('span');
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+
+    parts.forEach(part => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+        const strong = document.createElement('strong');
+        strong.textContent = part.slice(2, -2);
+        span.appendChild(strong);
+      } else {
+        span.appendChild(document.createTextNode(part));
+      }
+    });
+
+    fragment.appendChild(span);
+    if (lineIndex < lines.length - 1) {
+      fragment.appendChild(document.createElement('br'));
+    }
+  });
+
+  return Array.from(fragment.childNodes);
+}
+
+function scrollBottom() {
+  const c = document.getElementById('messages');
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+function miniMascot(){
+  return `<svg class="msg-bot-svg" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="108" rx="26" ry="18" fill="#1A3050" stroke="#C9A96E" stroke-width="1.2"/>
+    <path d="M54 95 L60 99 L66 95 L62 92 L60 94 L58 92 Z" fill="#C9A96E"/>
+    <circle cx="60" cy="60" r="28" fill="url(#mmg)"/>
+    <ellipse cx="60" cy="37" rx="20" ry="9" fill="#3D2B1F"/>
+    <path d="M40 45 Q38 34 50 32 Q60 28 70 32 Q82 34 80 45" fill="#3D2B1F"/>
+    <ellipse cx="50" cy="58" rx="4.5" ry="5" fill="white"/>
+    <ellipse cx="70" cy="58" rx="4.5" ry="5" fill="white"/>
+    <circle cx="51" cy="59" r="3" fill="#1A1A2E"/>
+    <circle cx="71" cy="59" r="3" fill="#1A1A2E"/>
+    <circle cx="52" cy="57.5" r="1" fill="white"/>
+    <circle cx="72" cy="57.5" r="1" fill="white"/>
+    <path d="M51 70 Q60 77 69 70" stroke="#9A7A4A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <ellipse cx="44" cy="67" rx="5" ry="3" fill="#E8A87C" opacity="0.35"/>
+    <ellipse cx="76" cy="67" rx="5" ry="3" fill="#E8A87C" opacity="0.35"/>
+    <defs><radialGradient id="mmg" cx="0.4" cy="0.35">
+      <stop offset="0" stop-color="#F0D9B5"/>
+      <stop offset="1" stop-color="#D4A870"/>
+    </radialGradient></defs>
+  </svg>`;
+}
+
+function appendMessage(role, content, card, qrs){
+  const ctn = document.getElementById('messages');
+  if(!ctn) return;
+  const row  = document.createElement('div'); row.className = 'msg ' + role;
+  const av   = document.createElement('div'); av.className  = 'msg-av';
+  av.innerHTML = (role === 'bot') ? miniMascot() : '👤';
+  const body = document.createElement('div'); body.className = 'msg-body';
+  const lbl  = document.createElement('div'); lbl.className  = 'msg-label';
+  lbl.textContent = (role === 'bot') ? 'HR Buddy' : 'You';
+  const bub  = document.createElement('div'); bub.className  = 'bubble';
+  bub.innerHTML = '';
+  for (const node of renderSafeFormatted(content)) {
+  bub.appendChild(node);
+}
+  body.appendChild(lbl); body.appendChild(bub);
+  if(card && card.title && Array.isArray(card.items)){
+    const cardEl = document.createElement('div'); cardEl.className = 'info-card';
+    const listHTML = card.items.map((it,idx) =>
+      `<li style="animation-delay:${idx*0.06}s;opacity:1">${it}</li>`).join('');
+    cardEl.innerHTML = `<div class="info-card-title">${card.title}</div><ul>${listHTML}</ul>`;
+    body.appendChild(cardEl);
+  }
+  row.appendChild(av); row.appendChild(body); ctn.appendChild(row);
+  if(role === 'bot' && Array.isArray(qrs) && qrs.length){
+    const qrWrap = document.createElement('div'); qrWrap.className = 'quick-replies';
+    qrs.forEach(function(q){
+      const btn = document.createElement('button'); btn.className = 'qr'; btn.textContent = q;
+      btn.addEventListener('click', function(){ submitText(q); });
+      qrWrap.appendChild(btn);
+    });
+    ctn.appendChild(qrWrap);
+  }
+  scrollBottom();
+  return bub;
+}
+
+function showTyping(){
+  const ctn = document.getElementById('messages');
+  if(!ctn || document.getElementById('typing-bubble')) return;
+  const row  = document.createElement('div'); row.className = 'msg bot'; row.id = 'typing-bubble';
+  const av   = document.createElement('div'); av.className  = 'msg-av'; av.innerHTML = miniMascot();
+  const body = document.createElement('div'); body.className = 'msg-body';
+  const lbl  = document.createElement('div'); lbl.className  = 'msg-label'; lbl.textContent = 'HR Buddy';
+  const bub  = document.createElement('div'); bub.className  = 'bubble';
+  bub.innerHTML = '<div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  body.appendChild(lbl); body.appendChild(bub);
+  row.appendChild(av); row.appendChild(body); ctn.appendChild(row); scrollBottom();
+  const ht = document.getElementById('hdrTyping'); if(ht) ht.classList.add('show');
+}
+
+function removeTyping(){
+  const el = document.getElementById('typing-bubble'); if(el) el.remove();
+  const ht = document.getElementById('hdrTyping'); if(ht) ht.classList.remove('show');
+}
+
+function setBusyState(busy){
+  isBusy = busy;
+  const btn = document.getElementById('sendBtn');
+  const inp = document.getElementById('userInput');
+  if(btn) btn.disabled = busy;
+  if(inp) inp.disabled = busy;
+}
+
+/* ── Core send logic ───────────────────────────────────────────────────────
+   Always reads response as an SSE stream.
+   No content-type branch. No fallback to res.json().
+   Splits on \n\n (real double newline), parses each data: {...} line.
+   ─────────────────────────────────────────────────────────────────────── */
+async function submitText(text) {
+  text = (text || '').trim();
+  if (!text || isBusy) return;
+
+  setBusyState(true);
+  appendMessage('user', text, null, null);
+  showTyping();
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+
+    if (!res.ok) throw new Error('Server error ' + res.status);
+
+    removeTyping();
+    const liveBubble = appendMessage('bot', '', null, null);
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer   = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // SSE events are separated by a blank line (\n\n)
+      const events = buffer.split('\n\n');
+      buffer = events.pop() || '';   // keep the incomplete trailing chunk
+
+      for (const evt of events) {
+        for (const line of evt.split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const payload = JSON.parse(line.slice(6));
+            if (typeof payload.token === 'string') {
+              fullText += payload.token;
+              liveBubble.innerHTML = '';
+              for (const node of renderSafeFormatted(fullText)) {
+                liveBubble.appendChild(node);
+              }
+              scrollBottom();
+            }
+          } catch (_) { /* non-JSON line, skip */ }
+        }
+      }
+    }
+
+    if (!fullText.trim()) {
+      liveBubble.innerHTML = '';
+      for (const node of renderSafeFormatted("Sorry, this information is not currently available. For further assistance, please contact HR directly.")) {
+        liveBubble.appendChild(node);
+      }
+    }
+
+  } catch (err) {
+    console.error('[HR Buddy] fetch error:', err);
+    removeTyping();
+    appendMessage('bot',
+      "I'm having trouble connecting right now. Please try again shortly.",
+      null, QUICK_REPLIES);
+  } finally {
+    setBusyState(false);
+    const inp = document.getElementById('userInput');
+    if (inp) { inp.disabled = false; inp.focus(); }
+  }
+}
+
+function sendMessage(){
+  const inp = document.getElementById('userInput');
+  if(!inp) return;
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  submitText(text);
+}
+
+function handleKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+/* ── Splash ────────────────────────────────────────────── */
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    const splash = document.getElementById('splash');
+    if(splash) splash.classList.add('hide');
+    setTimeout(function(){
+      if(splash) splash.style.display = 'none';
+      appendMessage('bot',
+        'Namaste! 🙏 Welcome to the **St. Regis Goa HR Portal**. I am **HR Buddy**, your HR assistant. How can I help you today?',
+        null, QUICK_REPLIES);
+    }, 800);
+  }, 2600);
+});
+</script>
+</body>
+</html>
